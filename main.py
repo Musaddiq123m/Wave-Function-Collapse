@@ -1,7 +1,8 @@
 import pygame
 import sys
 import random
-from tile import Tile
+# from tile import Tile
+from tile2 import *
 import math
 
 pygame.init()
@@ -9,7 +10,7 @@ clock = pygame.time.Clock()
 
 screen_width = 400
 screen_height = 400
-DIM = 10
+DIM = 20
 screen = pygame.display.set_mode((screen_width, screen_height))
 
 array = [[Tile() for _ in range(DIM)] for _ in range(DIM)]
@@ -36,40 +37,32 @@ def RandomMinEntropy(array):
     else:
         return (-1, -1)
                         
-def dfs(screen,array, start_x, start_y):
+def dfs(screen, array, start_x, start_y):
     rows, cols = DIM, DIM
     stack = [(start_x, start_y)]
+    
+    directions = [
+        ('UP', -1, 0),    
+        ('DOWN', 1, 0),   
+        ('LEFT', 0, -1),  
+        ('RIGHT', 0, 1)
+    ]
+    
     while stack:
         temp_x, temp_y = stack.pop()
         
         CollapsedCellImage = array[temp_x][temp_y].possibles[0]
-        if temp_x - 1 >= 0 and array[temp_x-1][temp_y].collapsed == False:
-            array[temp_x-1][temp_y].ReduceOptions(CollapsedCellImage, 'UP')
-            if len(array[temp_x-1][temp_y].possibles) == 1:
-                array[temp_x-1][temp_y].set_image()
-                stack.append((temp_x-1, temp_y))
-                draw(screen,array)
-                 
-        if temp_x + 1 < DIM and array[temp_x+1][temp_y].collapsed == False:
-            array[temp_x+1][temp_y].ReduceOptions(CollapsedCellImage, 'DOWN')
-            if len(array[temp_x+1][temp_y].possibles) == 1:
-                array[temp_x+1][temp_y].set_image()
-                stack.append((temp_x+1, temp_y))
-                draw(screen,array)
-    
-        if temp_y - 1 >= 0 and array[temp_x][temp_y-1].collapsed == False:
-            array[temp_x][temp_y-1].ReduceOptions(CollapsedCellImage, 'LEFT')
-            if len(array[temp_x][temp_y-1].possibles) == 1:
-                array[temp_x][temp_y-1].set_image()
-                stack.append((temp_x, temp_y-1))
-                draw(screen,array)
-                
-        if temp_y + 1 < DIM and array[temp_x][temp_y+1].collapsed == False:
-            array[temp_x][temp_y + 1].ReduceOptions(CollapsedCellImage, 'RIGHT')
-            if len(array[temp_x][temp_y+1].possibles) == 1:
-                array[temp_x][temp_y+1].set_image()
-                stack.append((temp_x, temp_y+1))
-                draw(screen,array)
+        
+        for direction, dx, dy in directions:
+            new_x, new_y = temp_x + dx, temp_y + dy
+            
+            if 0 <= new_x < DIM and 0 <= new_y < DIM and array[new_x][new_y].collapsed == False:
+                array[new_x][new_y].reduce_options(CollapsedCellImage, direction)
+                if len(array[new_x][new_y].possibles) == 1:
+                    array[new_x][new_y].set_image()
+                    stack.append((new_x, new_y))
+                    draw(screen, array)
+
     
 def draw(screen, array):
     size = screen_width // DIM
